@@ -1,37 +1,15 @@
-#!/usr/bin/env python
-
-"""Tests for `genetic_sro` package."""
-
 import pytest
+from genetic_sro.Structure import Structure
+from ase.io import read
 
-from click.testing import CliRunner
+class TestAlloy:
+    SA1=read('tests/CONTCAR-SA1-T100')
+    SA1_alloy=Structure(SA1)
 
-from genetic_sro import genetic_sro
-from genetic_sro import cli
-
-
-@pytest.fixture
-def response():
-    """Sample pytest fixture.
-
-    See more at: http://doc.pytest.org/en/latest/fixture.html
-    """
-    # import requests
-    # return requests.get('https://github.com/audreyr/cookiecutter-pypackage')
-
-
-def test_content(response):
-    """Sample pytest test function with the pytest fixture as an argument."""
-    # from bs4 import BeautifulSoup
-    # assert 'GitHub' in BeautifulSoup(response.content).title.string
-
-
-def test_command_line_interface():
-    """Test the CLI."""
-    runner = CliRunner()
-    result = runner.invoke(cli.main)
-    assert result.exit_code == 0
-    assert 'genetic_sro.cli.main' in result.output
-    help_result = runner.invoke(cli.main, ['--help'])
-    assert help_result.exit_code == 0
-    assert '--help  Show this message and exit.' in help_result.output
+    @pytest.mark.parametrize('alloy_name, expected_ratio',
+    [
+        (SA1_alloy,{'W':86.0/128.0,'Cr':34.0/128.0,'Ta':8.0/128.0})
+    ])
+    def test_atomic_ratio(self,alloy_name, expected_ratio):
+        for key in expected_ratio.keys():
+            assert alloy_name.atom_ratio[key]==expected_ratio[key]
